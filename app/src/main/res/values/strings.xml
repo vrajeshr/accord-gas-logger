@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AccordApp</string>
+    <string name="CSV_key">CSVData</string>
 </resources>
