@@ -1,6 +1,5 @@
 package com.example.accordapp
 
-import android.R.attr.name
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -25,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var total: EditText;
 
     lateinit var submitButton: Button;
-    lateinit var sharedPref:SharedPreferences;
+    lateinit var sharedPref: SharedPreferences;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,13 +39,19 @@ class MainActivity : AppCompatActivity() {
 
 
         gallonsInput.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable) { calculateTotal() }
+            override fun afterTextChanged(s: Editable) {
+                calculateTotal()
+            }
+
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
         })
 
         pricePerGallon.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable) { calculateTotal() }
+            override fun afterTextChanged(s: Editable) {
+                calculateTotal()
+            }
+
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
         })
@@ -61,7 +66,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun calculateTotal() {
-        if( pricePerGallon.text.length != 0 && gallonsInput.text.length !=0 ){
+        if (pricePerGallon.text.length != 0 && gallonsInput.text.length != 0) {
             var price = (pricePerGallon.text.toString()).toDouble()
             var gallons = (gallonsInput.text.toString()).toDouble()
 
@@ -77,19 +82,17 @@ class MainActivity : AppCompatActivity() {
 
         var file = File(getExternalFilesDir("AccordApp"), CSV_FILE_NAME)
 
-        if( !file.exists() ){
-            try{
+        if (!file.exists()) {
+            try {
                 file.createNewFile();
-            }
-            catch ( e : Exception ){
+            } catch (e: Exception) {
                 println("File failed to write: ${e.toString()}")
             }
         }
 
         try {
             file.appendText(line);
-        }
-        catch( e: Exception) {
+        } catch (e: Exception) {
             println("File I/O Error: $e");
         }
         sendPOST();
@@ -109,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         return line
     }
 
-    fun sendPOST(){
+    fun sendPOST() {
         val url = URL(AWS_URL)
 
     }
