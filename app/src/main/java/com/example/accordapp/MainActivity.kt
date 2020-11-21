@@ -7,10 +7,18 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.jaredrummler.android.shell.Shell
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.DataOutputStream
 import java.io.File
+import java.io.InputStreamReader
+import java.lang.StringBuilder
+import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 import java.sql.Timestamp
 
 
@@ -61,6 +69,40 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun onSubmit() {
+//        if( odometerInput.text.isEmpty() || pricePerGallon.text.isEmpty() || gallonsInput.text.isEmpty() || total.text.isEmpty() ){
+//            return
+//        }
+//
+//        var line = getCSVLine();
+//        resetFields();
+//
+//        var file = File(getExternalFilesDir("AccordApp"), CSV_FILE_NAME)
+//
+//        if (!file.exists()) {
+//            try {
+//                file.createNewFile();
+//            } catch (e: Exception) {
+//                println("File failed to write: ${e.toString()}")
+//            }
+//        }
+//
+//        try {
+//            file.appendText(line);
+//        } catch (e: Exception) {
+//            println("File I/O Error: $e");
+//        }
+//
+//        var fileContent = StringBuilder()
+//
+//        file.forEachLine {
+//            fileContent.append(it + "\n")
+//        }
+//
+//        sendPOST(fileContent.toString());
+        sendPOST("Hello world");
+    }
+
     fun isSUAvailable(): Boolean {
         return Shell.SU.available();
     }
@@ -76,27 +118,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    fun onSubmit() {
-        var line = getCSVLine();
-
-        var file = File(getExternalFilesDir("AccordApp"), CSV_FILE_NAME)
-
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (e: Exception) {
-                println("File failed to write: ${e.toString()}")
-            }
-        }
-
-        try {
-            file.appendText(line);
-        } catch (e: Exception) {
-            println("File I/O Error: $e");
-        }
-        sendPOST();
+    fun resetFields(){
+        odometerInput.setText("");
+        pricePerGallon.setText("");
+        gallonsInput.setText("")
+        total.setText("")
     }
+
+
 
     fun getCSVLine(): String {
         var line = ""
@@ -112,9 +141,44 @@ class MainActivity : AppCompatActivity() {
         return line
     }
 
-    fun sendPOST() {
-        val url = URL(AWS_URL)
+    fun sendPOST(fileContent: String) {
+        val thread = Thread(Runnable {
+            try {
+                val jsonParam = JSONObject()
+                jsonParam.put("data", fileContent)
 
+                val url = URL(AWS_URL)
+//                var url = URL("http://127.0.0.1:5000/")
+
+                with(url.openConnection() as HttpURLConnection) {
+                    requestMethod = "POST"
+                    setRequestProperty("Content-Type","application/json");
+
+                    var wr = DataOutputStream(this.outputStream);
+                    wr.writeBytes(jsonParam.toString());
+                    wr.flush();
+                    wr.close();
+
+//                    DisplayToast(responseCode);
+
+                    BufferedReader(InputStreamReader(inputStream)).use {
+                        val response = StringBuffer()
+
+                        var inputLIne = it.readLine()
+                        while(inputLIne != null) {
+                            response.append(inputLIne)
+                            inputLIne = it.readLine()
+                        }
+
+                        it.close()
+
+                        System.out.println(response);
+                    }
+                }
+            } catch (e: java.lang.Exception) {
+                System.out.println(e.toString());
+            }
+        })
+        thread.start();
     }
-
 }
